@@ -3,52 +3,60 @@
  */
 package hudson.plugins.harvest;
 
-import java.io.File;
-import java.io.IOException;
+import static org.junit.Assert.*;
 
-import junit.framework.TestCase;
+import hudson.scm.ChangeLogSet;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  * @author G&aacute;bor Lipt&aacute;k
  *
  */
-public class HarvestSCMTest extends TestCase {
+public class HarvestSCMTest {
 
-	/**
-	 * @param name
-	 */
-	public HarvestSCMTest(String name) {
-		super(name);
+	@BeforeClass
+	public static void setUpBeforeClass() throws Exception {
 	}
 
-	/* (non-Javadoc)
-	 * @see junit.framework.TestCase#setUp()
-	 */
-	protected void setUp() throws Exception {
-		super.setUp();
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
 	}
 
-	/* (non-Javadoc)
-	 * @see junit.framework.TestCase#tearDown()
-	 */
-	protected void tearDown() throws Exception {
-		super.tearDown();
+	@Before
+	public void setUp() throws Exception {
 	}
 
-	/**
-	 * Test method for {@link hudson.plugins.harvest.HarvestSCM#checkout(hudson.model.AbstractBuild, hudson.Launcher, hudson.FilePath, hudson.model.BuildListener, java.io.File)}.
-	 * @throws IOException 
-	 */
-	public final void testCheckoutAbstractBuildLauncherFilePathBuildListenerFile() throws IOException {
+	@After
+	public void tearDown() throws Exception {
 	}
 
-	public final void testCheckoutNotFound() {
-		String harvestHome="C:\\harvestnotinstalledhere";
-		try {
-			Process p=Runtime.getRuntime().exec(harvestHome+File.separator+"hco");
-			fail("expected IOException");
-		} catch (IOException e) {
-			// SUCCESS;
-		}
+	@Test
+	public final void testParse() throws IOException {
+		InputStream is=getClass().getResourceAsStream("/hco.sync.txt");
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "");
+		ChangeLogSet<HarvestChangeLogEntry> changes=scm.parse(null, is);
+		assertEquals(2, changes.getItems().length);
+	}
+
+	@Test (expected=IllegalArgumentException.class)
+	public final void testParseError() throws IOException {
+		InputStream is=getClass().getResourceAsStream("/hco.syncerror.txt");
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "");
+		scm.parse(null, is);
+	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public final void testParseFail() throws IOException {
+		InputStream is=getClass().getResourceAsStream("/hco.syncfail.txt");
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "");
+		scm.parse(null, is);
 	}
 }

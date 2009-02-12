@@ -6,11 +6,19 @@ package hudson.plugins.harvest;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -26,6 +34,7 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.TaskListener;
 import hudson.scm.ChangeLogParser;
+import hudson.scm.ChangeLogSet;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
 import hudson.util.ArgumentListBuilder;
@@ -86,12 +95,14 @@ public class HarvestSCM extends SCM {
 	 */
 	@Override
 	public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspace,
-			BuildListener listener, File changeLog) throws IOException,
+			BuildListener listener, File changeLogFile) throws IOException,
 			InterruptedException {
-		boolean checkoutSucceeded=false;
-        
-        logger.debug("deleting contents of workspace " + workspace);
-        workspace.deleteContents();
+		boolean synchronizeWorkspace=true;
+		
+		if (!synchronizeWorkspace){
+	        logger.debug("deleting contents of workspace " + workspace);
+	        workspace.deleteContents();			
+		}
         
 		logger.debug("starting checkout");
         
@@ -108,7 +119,11 @@ public class HarvestSCM extends SCM {
         cmd.add("-pn", getProcessName());
         cmd.add("-s");
         cmd.addQuoted(getRecursiveSearch());
-        cmd.add("-br");
+		if (!synchronizeWorkspace){
+			cmd.add("-br");
+		} else {
+			cmd.add("-sy");
+		}
         cmd.add("-r");
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -116,20 +131,19 @@ public class HarvestSCM extends SCM {
         logger.debug("launching command " + cmd.toList());
         
         Proc proc = launcher.launch(cmd.toCommandArray(), new String[0], baos, workspace);
+        // ignoring rc as sync might return 3 on success ...
         int rc = proc.join();
 
-        if (rc != 0) {
-            logger.error("command exited with " + rc);
-            listener.error("command exited with " + rc);
-            
-        } else { 
-            checkoutSucceeded = true; 
-            if (logger.isDebugEnabled()){
-                logger.debug("hco output:\n" + new String(baos.toByteArray()));            	
-            }
+        if (!synchronizeWorkspace){
+            createEmptyChangeLog(changeLogFile, listener, "changelog");         	
+        } else {
+        	FileInputStream fileInputStream=new FileInputStream(new File(workspace.getRemote()+File.separator+"hco.log"));
+        	ChangeLogSet<HarvestChangeLogEntry> history=parse(build, fileInputStream);
+            FileOutputStream fileOutputStream = new FileOutputStream(changeLogFile);
+            HarvestChangeLogSet.saveToChangeLog(fileOutputStream, history);
+            fileOutputStream.close();
+            fileInputStream.close();
         }
-        listener.getLogger().write(baos.toByteArray(), 0, baos.size());
-        listener.getLogger().println("reading from "+workspace.getRemote()+File.separator+"hco.log: ");
         
         BufferedReader r=new BufferedReader(new FileReader(workspace.getRemote()+File.separator+"hco.log"));
         try {
@@ -144,7 +158,58 @@ public class HarvestSCM extends SCM {
         }
 
         logger.debug("completing checkout");
-        return checkoutSucceeded;
+        return true;
+	}
+
+	protected ChangeLogSet<HarvestChangeLogEntry> parse(AbstractBuild build, InputStream inputStream) throws IOException {
+		BufferedReader br=new BufferedReader(new InputStreamReader(inputStream));
+        ArrayList<HarvestChangeLogEntry> history = new ArrayList<HarvestChangeLogEntry>();
+        Pattern pCheckout = Pattern.compile("I00020110: File (.*);([.\\d]+)  checked out to .*");
+        Pattern pSummary = Pattern.compile("I00060080: Check out summary: Total: (\\d+) ; Success: (\\d+) ; Failed: (\\d+) ; Not Processed: (\\d+) \\.");
+        String line="";
+        while ((line=br.readLine())!=null){
+        	if (StringUtils.indexOf(line, "E")==0){
+        		throw new IllegalArgumentException("error on line "+line);        		
+        	} else
+        	// I00060040: New connection with Broker broker  established.
+        	if (StringUtils.indexOf(line, "I00060040:")==0){
+        		continue;
+        	} else
+        		// I00020052:  No need to update file c:\dir1\file1  from repository version \repository\dir1\file1;0 .
+        		if (StringUtils.indexOf(line, "I00020052:")==0){
+            		continue;        		
+        	} else 
+        		// I00020110: File \repository\project\dir3\file5;1  checked out to server\\C:\.hudson\jobs\project\workspace\project\dir3\file5 .
+        		if (StringUtils.indexOf(line, "I00020110:")==0) {
+        			HarvestChangeLogEntry e=new HarvestChangeLogEntry();
+        			Matcher m = pCheckout.matcher(line);
+        			if (!m.matches()){
+                		throw new IllegalArgumentException("could not parse checkout line "+line);
+        			}
+        			e.setFullName(m.group(1));
+        			e.setVersion(m.group(2));
+        			history.add(e);
+        	} else 
+        		// I00060080: Check out summary: Total: 999 ; Success: 999 ; Failed: 0 ; Not Processed: 0 .
+        		if (StringUtils.indexOf(line, "I00060080:")==0){
+        			Matcher m = pSummary.matcher(line);
+        			if (!m.matches()){
+                		throw new IllegalArgumentException("could not parse checkout line "+line);
+        			}
+        			if (!StringUtils.equals("0", m.group(3))){
+                		throw new IllegalArgumentException("failed files in line "+line);        				
+        			}
+        			if (!StringUtils.equals("0", m.group(4))){
+                		throw new IllegalArgumentException("not processed files in line "+line);        				
+        			}
+        	} else if (StringUtils.indexOf(line, "Checkout has been executed successfully.")==0){
+        		// Checkout has been executed successfully.
+    			continue;
+        	} else {
+        		throw new IllegalArgumentException("could not parse line "+line);
+        	}
+        }
+        return new HarvestChangeLogSet(build, history);
 	}
 
 	/* (non-Javadoc)
@@ -152,8 +217,7 @@ public class HarvestSCM extends SCM {
 	 */
 	@Override
 	public ChangeLogParser createChangeLogParser() {
-		// TODO Auto-generated method stub
-		return null;
+		return new HarvestChangeLogParser();
 	}
 
 	/* (non-Javadoc)
@@ -161,7 +225,6 @@ public class HarvestSCM extends SCM {
 	 */
 	@Override
 	public DescriptorImpl getDescriptor() {
-		// TODO Auto-generated method stub
 		return DescriptorImpl.DESCRIPTOR;
 	}
 
