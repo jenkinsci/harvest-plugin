@@ -45,6 +45,11 @@ public class HarvestChangeLogSet extends ChangeLogSet<HarvestChangeLogEntry> {
 		return history.iterator();
 	}
 
+//    @Override
+//    public String getKind() {
+//        return "harvest";
+//    }
+
     public List<HarvestChangeLogEntry> getLogs() {
         return history;
     }

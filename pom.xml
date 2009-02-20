@@ -12,7 +12,7 @@
   <artifactId>harvest</artifactId>
   <packaging>hpi</packaging>
   <name>Hudson Harvest SCM</name>
-  <version>0.2</version>
+  <version>0.2-SNAPSHOT</version>
   <url>http://hudson.gotdns.com/wiki/display/HUDSON/Harvest+Plugin</url>
 
   <dependencies>
