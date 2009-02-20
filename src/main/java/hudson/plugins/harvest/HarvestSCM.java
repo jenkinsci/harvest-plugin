@@ -55,6 +55,8 @@ public class HarvestSCM extends SCM {
     private String clientPath = null;
     private String processName = null;
     private String recursiveSearch = null;
+	private boolean useSynchronize=true;
+	
 
 	/**
 	 * Constructor
@@ -71,7 +73,7 @@ public class HarvestSCM extends SCM {
     @DataBoundConstructor
 	public HarvestSCM(String broker, String userId, String password, String projectName,
 			String state, String viewPath, String clientPath, String processName,
-			String recursiveSearch){
+			String recursiveSearch, Boolean useSynchronize){
 		this.broker=broker;
 		this.userId=userId;
 		this.password=password;
@@ -81,6 +83,7 @@ public class HarvestSCM extends SCM {
 		this.clientPath=clientPath;
 		this.processName=processName;
 		this.recursiveSearch=recursiveSearch;
+		this.useSynchronize=useSynchronize;
 	}
 	
     @Override
@@ -97,9 +100,8 @@ public class HarvestSCM extends SCM {
 	public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspace,
 			BuildListener listener, File changeLogFile) throws IOException,
 			InterruptedException {
-		boolean synchronizeWorkspace=true;
-		
-		if (!synchronizeWorkspace){
+
+		if (!useSynchronize){
 	        logger.debug("deleting contents of workspace " + workspace);
 	        workspace.deleteContents();			
 		}
@@ -119,7 +121,7 @@ public class HarvestSCM extends SCM {
         cmd.add("-pn", getProcessName());
         cmd.add("-s");
         cmd.addQuoted(getRecursiveSearch());
-		if (!synchronizeWorkspace){
+		if (!useSynchronize){
 			cmd.add("-br");
 		} else {
 			cmd.add("-sy");
@@ -134,7 +136,7 @@ public class HarvestSCM extends SCM {
         // ignoring rc as sync might return 3 on success ...
         int rc = proc.join();
 
-        if (!synchronizeWorkspace){
+        if (!useSynchronize){
             createEmptyChangeLog(changeLogFile, listener, "changelog");         	
         } else {
         	FileInputStream fileInputStream=new FileInputStream(new File(workspace.getRemote()+File.separator+"hco.log"));
@@ -364,7 +366,21 @@ public class HarvestSCM extends SCM {
 		this.recursiveSearch = recursiveSearch;
 	}
 
-    public static final class DescriptorImpl extends SCMDescriptor<HarvestSCM> {
+    /**
+	 * @return the useSynchronize
+	 */
+	public boolean isUseSynchronize() {
+		return useSynchronize;
+	}
+
+	/**
+	 * @param useSynchronize the useSynchronize to set
+	 */
+	public void setUseSynchronize(boolean useSynchronize) {
+		this.useSynchronize = useSynchronize;
+	}
+
+	public static final class DescriptorImpl extends SCMDescriptor<HarvestSCM> {
 
     	private String executable="hco";
     	
@@ -405,6 +421,5 @@ public class HarvestSCM extends SCM {
         public String getExecutable() {
             return executable;
         }
-}
-
+    }
 }

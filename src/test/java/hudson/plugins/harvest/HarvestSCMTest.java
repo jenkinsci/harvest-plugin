@@ -41,7 +41,7 @@ public class HarvestSCMTest {
 	@Test
 	public final void testParse() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.sync.txt");
-		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "");
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
 		ChangeLogSet<HarvestChangeLogEntry> changes=scm.parse(null, is);
 		assertEquals(2, changes.getItems().length);
 	}
@@ -49,14 +49,14 @@ public class HarvestSCMTest {
 	@Test (expected=IllegalArgumentException.class)
 	public final void testParseError() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.syncerror.txt");
-		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "");
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
 		scm.parse(null, is);
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public final void testParseFail() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.syncfail.txt");
-		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "");
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
 		scm.parse(null, is);
 	}
 }

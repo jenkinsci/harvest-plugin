@@ -68,12 +68,21 @@
     <f:textbox field="harvest.processName" value="${scm.processName}"/>
   </f:entry>
   
-  <f:entry title="Recursive Search" help="${rootURL}/harvest/harvest/recursivesearch.html">
+  <f:entry title="Recursive Search" help="${rootURL}/plugin/harvest/recursivesearch.html">
     <!--
       Creates an text field that shows the value of the "name" property.
       When submitted, it will be passed to the corresponding constructor parameter.
     -->
     <f:textbox field="harvest.recursiveSearch" value="${scm.recursiveSearch}"/>
+  </f:entry>
+
+  <f:entry title="Use Synchronize" help="${rootURL}/plugin/harvest/usesynchronize.html">
+    <!--
+      Creates an text field that shows the value of the "name" property.
+      When submitted, it will be passed to the corresponding constructor parameter.
+    <f:checkbox name="harvest.useSynchronize" checked="${scm.useSynchronize}" />
+    -->
+    <f:checkbox name="harvest.useSynchronize" checked="${scm.useSynchronize}" />
   </f:entry>
 
 </j:jelly>
