@@ -117,7 +117,11 @@ public class HarvestSCM extends SCM {
         cmd.add("-st", getState());
         cmd.add("-vp", getViewPath());
         cmd.add("-cp");
-        cmd.addQuoted(workspace.getRemote());
+        String workspacePath=workspace.getRemote();
+        if (!StringUtils.isEmpty(getClientPath())){
+        	workspacePath=workspacePath+File.separator+getClientPath();
+        }
+        cmd.addQuoted(workspacePath);
         cmd.add("-pn", getProcessName());
         cmd.add("-s");
         cmd.addQuoted(getRecursiveSearch());
