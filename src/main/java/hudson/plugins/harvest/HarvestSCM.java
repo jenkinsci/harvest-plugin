@@ -118,7 +118,8 @@ public class HarvestSCM extends SCM {
         cmd.add("-vp", getViewPath());
         cmd.add("-cp");
         String workspacePath=workspace.getRemote();
-        if (!StringUtils.isEmpty(getClientPath())){
+        // TODO: allowing "." is just for compatibility, will be removed in future releases ...
+        if (!StringUtils.isEmpty(getClientPath()) && !".".equals(getClientPath())){
         	workspacePath=workspacePath+File.separator+getClientPath();
         }
         cmd.addQuoted(workspacePath);
