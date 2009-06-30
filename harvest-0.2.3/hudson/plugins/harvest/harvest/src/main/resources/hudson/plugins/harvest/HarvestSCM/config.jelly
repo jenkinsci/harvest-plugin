@@ -1,0 +1,88 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This jelly script is used for per-project configuration.
+
+    See global.jelly for a general discussion about jelly script.
+  -->
+  <f:entry title="Broker" help="${rootURL}/plugin/harvest/broker.html">
+    <!--
+      Creates an text field that shows the value of the "name" property.
+      When submitted, it will be passed to the corresponding constructor parameter.
+    -->
+    <f:textbox field="harvest.broker" value="${scm.broker}"/>
+  </f:entry>
+
+  <f:entry title="Userid" help="${rootURL}/plugin/harvest/userid.html">
+    <!--
+      Creates an text field that shows the value of the "name" property.
+      When submitted, it will be passed to the corresponding constructor parameter.
+    -->
+    <f:textbox field="harvest.userId" value="${scm.userId}"/>
+  </f:entry>
+  
+  <f:entry title="Password" help="${rootURL}/plugin/harvest/password.html">
+    <!--
+      Creates an text field that shows the value of the "name" property.
+      When submitted, it will be passed to the corresponding constructor parameter.
+    -->
+    <f:password field="harvest.password" value="${scm.password}"/>
+  </f:entry>
+  
+  <f:entry title="Project Name" help="${rootURL}/plugin/harvest/project.html">
+    <!--
+      Creates an text field that shows the value of the "name" property.
+      When submitted, it will be passed to the corresponding constructor parameter.
+    -->
+    <f:textbox field="harvest.projectName" value="${scm.projectName}"/>
+  </f:entry>
+  
+  <f:entry title="State" help="${rootURL}/plugin/harvest/state.html">
+    <!--
+      Creates an text field that shows the value of the "name" property.
+      When submitted, it will be passed to the corresponding constructor parameter.
+    -->
+    <f:textbox field="harvest.state" value="${scm.state}"/>
+  </f:entry>
+  
+  <f:entry title="View Path (remote)" help="${rootURL}/plugin/harvest/viewpath.html">
+    <!--
+      Creates an text field that shows the value of the "name" property.
+      When submitted, it will be passed to the corresponding constructor parameter.
+    -->
+    <f:textbox field="harvest.viewPath" value="${scm.viewPath}"/>
+  </f:entry>
+  	
+  <f:entry title="Client Path" help="${rootURL}/plugin/harvest/clientpath.html">
+    <!--
+      Creates an text field that shows the value of the "name" property.
+      When submitted, it will be passed to the corresponding constructor parameter.
+    -->
+    <f:textbox field="harvest.clientPath" value="${scm.clientPath}"/>
+  </f:entry>
+  
+  <f:entry title="Process Name" help="${rootURL}/plugin/harvest/processname.html">
+    <!--
+      Creates an text field that shows the value of the "name" property.
+      When submitted, it will be passed to the corresponding constructor parameter.
+    -->
+    <f:textbox field="harvest.processName" value="${scm.processName}"/>
+  </f:entry>
+  
+  <f:entry title="Recursive Search" help="${rootURL}/plugin/harvest/recursivesearch.html">
+    <!--
+      Creates an text field that shows the value of the "name" property.
+      When submitted, it will be passed to the corresponding constructor parameter.
+    -->
+    <f:textbox field="harvest.recursiveSearch" value="${scm.recursiveSearch}"/>
+  </f:entry>
+
+  <f:entry title="Use Synchronize" help="${rootURL}/plugin/harvest/usesynchronize.html">
+    <!--
+      Creates an text field that shows the value of the "name" property.
+      When submitted, it will be passed to the corresponding constructor parameter.
+    <f:checkbox name="harvest.useSynchronize" checked="${scm.useSynchronize}" />
+    -->
+    <f:checkbox name="harvest.useSynchronize" checked="${scm.useSynchronize}" />
+  </f:entry>
+
+</j:jelly>
