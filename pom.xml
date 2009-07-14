@@ -13,25 +13,4 @@
   <name>Hudson Harvest SCM</name>
   <version>0.2.5-SNAPSHOT</version>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Harvest+Plugin</url>
-
-  <dependencies>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.3</version>
-      <scope>provided</scope>
-    </dependency>
-	<dependency>
-		<groupId>org.jvnet.localizer</groupId>
-		<artifactId>localizer</artifactId>
-		<version>1.9</version>
-	</dependency>
-  </dependencies>
-
-
-  <scm>
-    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/harvest-0.2.3</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/harvest-0.2.3</developerConnection>
-    <url>https://hudson.dev.java.net/source/browse/hudson/hudson/plugins/harvest/tags/harvest-0.2.3</url>
-  </scm>
 </project>
