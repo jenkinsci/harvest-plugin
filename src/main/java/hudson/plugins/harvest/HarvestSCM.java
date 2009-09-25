@@ -18,16 +18,17 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
 
+import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.Proc;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -38,7 +39,7 @@ import hudson.scm.ChangeLogSet;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
 import hudson.util.ArgumentListBuilder;
-import hudson.util.FormFieldValidator;
+import hudson.util.FormValidation;
 
 /**
  * @author G&aacute;bor Lipt&aacute;k
@@ -137,9 +138,8 @@ public class HarvestSCM extends SCM {
 
         logger.debug("launching command " + cmd.toList());
         
-        Proc proc = launcher.launch(cmd.toCommandArray(), new String[0], baos, workspace);
         // ignoring rc as sync might return 3 on success ...
-        int rc = proc.join();
+        int rc = launcher.launch().cmds(cmd).stdout(baos).pwd(workspace).join();
 
         if (!useSynchronize){
             createEmptyChangeLog(changeLogFile, listener, "changelog");         	
@@ -391,6 +391,7 @@ public class HarvestSCM extends SCM {
     	
 		private static final Log LOGGER = LogFactory.getLog(DescriptorImpl.class);
         
+		@Extension
 		public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
 		private DescriptorImpl() {
@@ -402,7 +403,7 @@ public class HarvestSCM extends SCM {
 		 * @see hudson.model.Descriptor#configure(org.kohsuke.stapler.StaplerRequest)
 		 */
 		@Override
-		public boolean configure(StaplerRequest req) throws FormException {
+		public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             LOGGER.debug("configuring from " + req);
             
             executable = Util.fixEmpty(req.getParameter("harvest.executable").trim());
@@ -413,9 +414,9 @@ public class HarvestSCM extends SCM {
         /**
          * 
          */
-        public void doExecutableCheck(final StaplerRequest req, final StaplerResponse resp)
-            throws IOException, ServletException {
-        		new FormFieldValidator.Executable(req, resp).process();
+        public FormValidation doExecutableCheck(@QueryParameter final String value)
+                throws IOException, ServletException {
+            return FormValidation.validateExecutable(value);
         }
         
 		@Override
