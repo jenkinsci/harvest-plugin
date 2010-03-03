@@ -11,6 +11,12 @@
   <artifactId>harvest</artifactId>
   <packaging>hpi</packaging>
   <name>Hudson Harvest SCM</name>
-  <version>0.2.8-SNAPSHOT</version>
+  <version>0.3-SNAPSHOT</version>
   <url>http://wiki.hudson-ci.org/display/HUDSON/Harvest+Plugin</url>
+  <developers>
+    <developer>
+      <id>gliptak</id>
+      <name>Gábor Lipták</name>
+    </developer>
+  </developers>
 </project>
