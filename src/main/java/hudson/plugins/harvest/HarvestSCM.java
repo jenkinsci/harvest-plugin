@@ -109,30 +109,7 @@ public class HarvestSCM extends SCM {
         
 		logger.debug("starting checkout");
         
-        ArgumentListBuilder cmd = new ArgumentListBuilder();
-        cmd.add(getDescriptor().getExecutable());
-        cmd.add("-b", getBroker());
-        cmd.add("-usr", getUserId());
-        cmd.add("-pw", getPassword());
-        cmd.add("-en", getProjectName());
-        cmd.add("-st", getState());
-        cmd.add("-vp", getViewPath());
-        cmd.add("-cp");
-        String workspacePath=workspace.getRemote();
-        // TODO: allowing "." is just for compatibility, will be removed in future releases ...
-        if (!StringUtils.isEmpty(getClientPath()) && !".".equals(getClientPath())){
-        	workspacePath=workspacePath+File.separator+getClientPath();
-        }
-        cmd.addQuoted(workspacePath);
-        cmd.add("-pn", getProcessName());
-        cmd.add("-s");
-        cmd.addQuoted(getRecursiveSearch());
-		if (!useSynchronize){
-			cmd.add("-br");
-		} else {
-			cmd.add("-sy");
-		}
-        cmd.add("-r");
+        ArgumentListBuilder cmd = prepareCommand(getDescriptor().getExecutable(), workspace.getRemote());
         
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -166,6 +143,35 @@ public class HarvestSCM extends SCM {
 
         logger.debug("completing checkout");
         return true;
+	}
+
+	protected ArgumentListBuilder prepareCommand(String executable, String workspacePath) {
+		ArgumentListBuilder cmd = new ArgumentListBuilder();
+        cmd.add(executable);
+        cmd.add("-b", getBroker());
+        cmd.add("-usr", getUserId());
+        cmd.add("-pw", getPassword());
+        cmd.add("-en", getProjectName());
+        cmd.add("-st", getState());
+        cmd.add("-vp", getViewPath());
+        cmd.add("-cp");
+
+        // TODO: allowing "." is just for compatibility, will be removed in future releases ...
+        if (!StringUtils.isEmpty(getClientPath()) && !".".equals(getClientPath())){
+        	workspacePath=workspacePath+File.separator+getClientPath();
+        }
+        cmd.addQuoted(workspacePath);
+        cmd.add("-pn", getProcessName());
+        cmd.add("-s");
+        cmd.addQuoted(getRecursiveSearch());
+		if (isUseSynchronize()){
+			cmd.add("-sy");
+			cmd.add("-nt");
+		} else {
+			cmd.add("-br");
+		}
+        cmd.add("-r");
+		return cmd;
 	}
 
 	protected ChangeLogSet<HarvestChangeLogEntry> parse(AbstractBuild build, InputStream inputStream) throws IOException {

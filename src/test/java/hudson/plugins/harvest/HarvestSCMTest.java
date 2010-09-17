@@ -6,9 +6,12 @@ package hudson.plugins.harvest;
 import static org.junit.Assert.*;
 
 import hudson.scm.ChangeLogSet;
+import hudson.util.ArgumentListBuilder;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -58,5 +61,35 @@ public class HarvestSCMTest {
 		InputStream is=getClass().getResourceAsStream("/hco.syncfail.txt");
 		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
 		scm.parse(null, is);
+	}
+	
+	@Test
+	public final void testPrepareCommandSynch(){
+		HarvestSCM scm=new HarvestSCM("broker", "user", "password",
+				"project", "DEV", "/Project", "bar", "Checkout", "", true);
+		ArgumentListBuilder cmd=scm.prepareCommand("hco.exe", "c:\\foo");
+		List<String> parts=cmd.toList();
+		StringBuffer sb=new StringBuffer();
+		for (String s: parts){
+			sb.append(s);
+			sb.append(" ");
+		}
+		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -sy -nt -r "
+				, sb.toString());
+	}
+
+	@Test
+	public final void testPrepareCommandNoSynch(){
+		HarvestSCM scm=new HarvestSCM("broker", "user", "password",
+				"project", "DEV", "/Project", "bar", "Checkout", "", false);
+		ArgumentListBuilder cmd=scm.prepareCommand("hco.exe", "c:\\foo");
+		List<String> parts=cmd.toList();
+		StringBuffer sb=new StringBuffer();
+		for (String s: parts){
+			sb.append(s);
+			sb.append(" ");
+		}
+		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -br -r "
+				, sb.toString());
 	}
 }
