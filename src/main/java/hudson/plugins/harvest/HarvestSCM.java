@@ -36,6 +36,8 @@ import hudson.model.BuildListener;
 import hudson.model.TaskListener;
 import hudson.scm.ChangeLogParser;
 import hudson.scm.ChangeLogSet;
+import hudson.scm.PollingResult;
+import hudson.scm.SCMRevisionState;
 import hudson.scm.SCM;
 import hudson.scm.SCMDescriptor;
 import hudson.util.ArgumentListBuilder;
@@ -98,7 +100,7 @@ public class HarvestSCM extends SCM {
 	 * @see hudson.scm.SCM#checkout(hudson.model.AbstractBuild, hudson.Launcher, hudson.FilePath, hudson.model.BuildListener, java.io.File)
 	 */
 	@Override
-	public boolean checkout(AbstractBuild build, Launcher launcher, FilePath workspace,
+	public boolean checkout(AbstractBuild<?,?> build, Launcher launcher, FilePath workspace,
 			BuildListener listener, File changeLogFile) throws IOException,
 			InterruptedException {
 
@@ -174,7 +176,7 @@ public class HarvestSCM extends SCM {
 		return cmd;
 	}
 
-	protected ChangeLogSet<HarvestChangeLogEntry> parse(AbstractBuild build, InputStream inputStream) throws IOException {
+	protected ChangeLogSet<HarvestChangeLogEntry> parse(AbstractBuild<?,?> build, InputStream inputStream) throws IOException {
 		BufferedReader br=new BufferedReader(new InputStreamReader(inputStream));
         ArrayList<HarvestChangeLogEntry> history = new ArrayList<HarvestChangeLogEntry>();
         Pattern pCheckout = Pattern.compile("I00020110: File (.*);([.\\d]+)  checked out to .*");
@@ -245,10 +247,26 @@ public class HarvestSCM extends SCM {
 	 * @see hudson.scm.SCM#pollChanges(hudson.model.AbstractProject, hudson.Launcher, hudson.FilePath, hudson.model.TaskListener)
 	 */
 	@Override
-	public boolean pollChanges(AbstractProject arg0, Launcher arg1,
+	@Deprecated
+	public boolean pollChanges(AbstractProject<?,?> arg0, Launcher arg1,
 			FilePath arg2, TaskListener arg3) throws IOException,
 			InterruptedException {
 		return false;
+	}
+
+	@Override
+	public SCMRevisionState calcRevisionsFromBuild(AbstractBuild<?, ?> build,
+			Launcher launcher, TaskListener listener) throws IOException,
+			InterruptedException {
+		return SCMRevisionState.NONE;
+	}
+
+	@Override
+	protected PollingResult compareRemoteRevisionWith(
+			AbstractProject<?, ?> project, Launcher launcher,
+			FilePath workspace, TaskListener listener, SCMRevisionState baseline)
+			throws IOException, InterruptedException {
+		return PollingResult.NO_CHANGES;
 	}
 
     /**
