@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package hudson.plugins.harvest;
 
@@ -7,12 +7,14 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,7 +61,6 @@ public class HarvestSCM extends SCM {
     private String processName = null;
     private String recursiveSearch = null;
 	private boolean useSynchronize=true;
-	
 
 	/**
 	 * Constructor
@@ -88,10 +89,10 @@ public class HarvestSCM extends SCM {
 		this.recursiveSearch=recursiveSearch;
 		this.useSynchronize=useSynchronize;
 	}
-	
+
     @Override
 	public boolean supportsPolling() {
-		return false;
+		return isUseSynchronize();
 	}
 
 	private final Log logger = LogFactory.getLog(getClass());
@@ -106,31 +107,22 @@ public class HarvestSCM extends SCM {
 
 		if (!useSynchronize){
 	        logger.debug("deleting contents of workspace " + workspace);
-	        workspace.deleteContents();			
+	        workspace.deleteContents();
 		}
-        
-		logger.debug("starting checkout");
-        
-        ArgumentListBuilder cmd = prepareCommand(getDescriptor().getExecutable(), workspace.getRemote());
-        
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        logger.debug("launching command " + cmd.toList());
-        
-        // ignoring rc as sync might return 3 on success ...
-        int rc = launcher.launch().cmds(cmd).stdout(baos).pwd(workspace).join();
+		logger.debug("starting checkout");
+
+		List<HarvestChangeLogEntry> listOfChanges=checkoutInternal(launcher, workspace, listener);
 
         if (!useSynchronize){
-            createEmptyChangeLog(changeLogFile, listener, "changelog");         	
+            createEmptyChangeLog(changeLogFile, listener, "changelog");
         } else {
-        	FileInputStream fileInputStream=new FileInputStream(new File(workspace.getRemote()+File.separator+"hco.log"));
-        	ChangeLogSet<HarvestChangeLogEntry> history=parse(build, fileInputStream);
+        	ChangeLogSet<HarvestChangeLogEntry> history=new HarvestChangeLogSet(build, listOfChanges);
             FileOutputStream fileOutputStream = new FileOutputStream(changeLogFile);
             HarvestChangeLogSet.saveToChangeLog(fileOutputStream, history);
             fileOutputStream.close();
-            fileInputStream.close();
         }
-        
+
         BufferedReader r=new BufferedReader(new FileReader(workspace.getRemote()+File.separator+"hco.log"));
         try {
         	String line=null;
@@ -145,6 +137,35 @@ public class HarvestSCM extends SCM {
 
         logger.debug("completing checkout");
         return true;
+	}
+
+	protected List<HarvestChangeLogEntry> checkoutInternal(Launcher launcher,
+			FilePath workspace, TaskListener listener)	throws IOException, InterruptedException, FileNotFoundException {
+
+		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
+
+		ArgumentListBuilder cmd = prepareCommand(getDescriptor().getExecutable(), workspace.getRemote());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        logger.debug("launching command " + cmd.toList());
+
+        // ignoring rc as sync might return 3 on success ...
+        int rc = launcher.launch().cmds(cmd).stdout(baos).pwd(workspace).join();
+
+        if (isUseSynchronize()){
+        	FileInputStream fileInputStream=null;
+        	try {
+            	fileInputStream=new FileInputStream(new File(workspace.getRemote()+File.separator+"hco.log"));
+            	parse(fileInputStream, listOfChanges);
+        	} finally {
+        		if (fileInputStream!=null){
+                    fileInputStream.close();
+        		}
+        	}
+        }
+
+        return listOfChanges;
 	}
 
 	protected ArgumentListBuilder prepareCommand(String executable, String workspacePath) {
@@ -176,15 +197,14 @@ public class HarvestSCM extends SCM {
 		return cmd;
 	}
 
-	protected ChangeLogSet<HarvestChangeLogEntry> parse(AbstractBuild<?,?> build, InputStream inputStream) throws IOException {
+	protected void parse(InputStream inputStream, List<HarvestChangeLogEntry> listOfChanges) throws IOException {
 		BufferedReader br=new BufferedReader(new InputStreamReader(inputStream));
-        ArrayList<HarvestChangeLogEntry> history = new ArrayList<HarvestChangeLogEntry>();
-        Pattern pCheckout = Pattern.compile("I00020110: File (.*);([.\\d]+)  checked out to .*");
+		Pattern pCheckout = Pattern.compile("I00020110: File (.*);([.\\d]+)  checked out to .*");
         Pattern pSummary = Pattern.compile("I00060080: Check out summary: Total: (\\d+) ; Success: (\\d+) ; Failed: (\\d+) ; Not Processed: (\\d+) \\.");
         String line="";
         while ((line=br.readLine())!=null){
         	if (StringUtils.indexOf(line, "E")==0){
-        		throw new IllegalArgumentException("error on line "+line);        		
+        		throw new IllegalArgumentException("error on line "+line);
         	} else
         	// I00060040: New connection with Broker broker  established.
         	if (StringUtils.indexOf(line, "I00060040:")==0){
@@ -192,8 +212,8 @@ public class HarvestSCM extends SCM {
         	} else
         		// I00020052:  No need to update file c:\dir1\file1  from repository version \repository\dir1\file1;0 .
         		if (StringUtils.indexOf(line, "I00020052:")==0){
-            		continue;        		
-        	} else 
+            		continue;
+        	} else
         		// I00020110: File \repository\project\dir3\file5;1  checked out to server\\C:\.hudson\jobs\project\workspace\project\dir3\file5 .
         		if (StringUtils.indexOf(line, "I00020110:")==0) {
         			HarvestChangeLogEntry e=new HarvestChangeLogEntry();
@@ -203,8 +223,8 @@ public class HarvestSCM extends SCM {
         			}
         			e.setFullName(m.group(1));
         			e.setVersion(m.group(2));
-        			history.add(e);
-        	} else 
+        			listOfChanges.add(e);
+        	} else
         		// I00060080: Check out summary: Total: 999 ; Success: 999 ; Failed: 0 ; Not Processed: 0 .
         		if (StringUtils.indexOf(line, "I00060080:")==0){
         			Matcher m = pSummary.matcher(line);
@@ -212,10 +232,10 @@ public class HarvestSCM extends SCM {
                 		throw new IllegalArgumentException("could not parse checkout line "+line);
         			}
         			if (!StringUtils.equals("0", m.group(3))){
-                		throw new IllegalArgumentException("failed files in line "+line);        				
+                		throw new IllegalArgumentException("failed files in line "+line);
         			}
         			if (!StringUtils.equals("0", m.group(4))){
-                		throw new IllegalArgumentException("not processed files in line "+line);        				
+                		throw new IllegalArgumentException("not processed files in line "+line);
         			}
         	} else if (StringUtils.indexOf(line, "Checkout has been executed successfully.")==0){
         		// Checkout has been executed successfully.
@@ -224,7 +244,6 @@ public class HarvestSCM extends SCM {
         		throw new IllegalArgumentException("could not parse line "+line);
         	}
         }
-        return new HarvestChangeLogSet(build, history);
 	}
 
 	/* (non-Javadoc)
@@ -243,17 +262,6 @@ public class HarvestSCM extends SCM {
 		return DescriptorImpl.DESCRIPTOR;
 	}
 
-	/* (non-Javadoc)
-	 * @see hudson.scm.SCM#pollChanges(hudson.model.AbstractProject, hudson.Launcher, hudson.FilePath, hudson.model.TaskListener)
-	 */
-	@Override
-	@Deprecated
-	public boolean pollChanges(AbstractProject<?,?> arg0, Launcher arg1,
-			FilePath arg2, TaskListener arg3) throws IOException,
-			InterruptedException {
-		return false;
-	}
-
 	@Override
 	public SCMRevisionState calcRevisionsFromBuild(AbstractBuild<?, ?> build,
 			Launcher launcher, TaskListener listener) throws IOException,
@@ -266,7 +274,12 @@ public class HarvestSCM extends SCM {
 			AbstractProject<?, ?> project, Launcher launcher,
 			FilePath workspace, TaskListener listener, SCMRevisionState baseline)
 			throws IOException, InterruptedException {
-		return PollingResult.NO_CHANGES;
+		List<HarvestChangeLogEntry> listOfChanges=checkoutInternal(launcher, workspace, listener);
+		if (listOfChanges.size()>0){
+			return PollingResult.SIGNIFICANT;
+		} else {
+			return PollingResult.NO_CHANGES;			
+		}
 	}
 
     /**
@@ -412,9 +425,9 @@ public class HarvestSCM extends SCM {
 	public static final class DescriptorImpl extends SCMDescriptor<HarvestSCM> {
 
     	private String executable="hco";
-    	
+
 		private static final Log LOGGER = LogFactory.getLog(DescriptorImpl.class);
-        
+
 		@Extension
 		public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
@@ -422,27 +435,27 @@ public class HarvestSCM extends SCM {
             super(HarvestSCM.class, null);
             load();
         }
-        
+
 		/* (non-Javadoc)
 		 * @see hudson.model.Descriptor#configure(org.kohsuke.stapler.StaplerRequest)
 		 */
 		@Override
 		public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             LOGGER.debug("configuring from " + req);
-            
+
             executable = Util.fixEmpty(req.getParameter("harvest.executable").trim());
             save();
 			return true;
 		}
 
         /**
-         * 
+         *
          */
         public FormValidation doExecutableCheck(@QueryParameter final String value)
                 throws IOException, ServletException {
             return FormValidation.validateExecutable(value);
         }
-        
+
 		@Override
 		public String getDisplayName() {
 			return "CA Harvest";

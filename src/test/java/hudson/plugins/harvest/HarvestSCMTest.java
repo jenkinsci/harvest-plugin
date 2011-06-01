@@ -11,6 +11,7 @@ import hudson.util.ArgumentListBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
@@ -45,22 +46,26 @@ public class HarvestSCMTest {
 	public final void testParse() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.sync.txt");
 		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
-		ChangeLogSet<HarvestChangeLogEntry> changes=scm.parse(null, is);
-		assertEquals(2, changes.getItems().length);
+		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
+		scm.parse(is, listOfChanges);
+    	ChangeLogSet<HarvestChangeLogEntry> history=new HarvestChangeLogSet(null, listOfChanges);
+		assertEquals(2, history.getItems().length);
 	}
 
 	@Test (expected=IllegalArgumentException.class)
 	public final void testParseError() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.syncerror.txt");
 		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
-		scm.parse(null, is);
+		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
+		scm.parse(is, listOfChanges);
 	}
 	
 	@Test (expected=IllegalArgumentException.class)
 	public final void testParseFail() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.syncfail.txt");
 		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
-		scm.parse(null, is);
+		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
+		scm.parse(is, listOfChanges);
 	}
 	
 	@Test

@@ -86,14 +86,14 @@ public class HarvestChangeLogEntry extends Entry {
 	}
 
     /**
-	 * @return the version
+	 * @return the user
 	 */
 	public String getUser() {
 		return user;
 	}
 
 	/**
-	 * @param version the version to set
+	 * @param user the user to set
 	 */
 	public void setUser(String user) {
 		this.user = user;

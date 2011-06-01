@@ -54,14 +54,14 @@ public class HarvestChangeLogSet extends ChangeLogSet<HarvestChangeLogEntry> {
         return history;
     }
 
-	public static ChangeLogSet<HarvestChangeLogEntry> parse(AbstractBuild build, File changeLogFile) throws IOException, SAXException {
+	public static ChangeLogSet<HarvestChangeLogEntry> parse(AbstractBuild<?,?> build, File changeLogFile) throws IOException, SAXException {
         InputStream fileInputStream = new FileInputStream(changeLogFile);
         HarvestChangeLogSet logSet = parse(build, fileInputStream);
         fileInputStream.close();
         return logSet;
 	}
 
-	protected static HarvestChangeLogSet parse(AbstractBuild build, InputStream inputStream) throws IOException, SAXException {
+	protected static HarvestChangeLogSet parse(AbstractBuild<?,?> build, InputStream inputStream) throws IOException, SAXException {
 		List<HarvestChangeLogEntry> history=new ArrayList<HarvestChangeLogEntry>();
 
 		// Parse the change log file.

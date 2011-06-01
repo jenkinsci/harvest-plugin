@@ -5,6 +5,8 @@ import hudson.scm.ChangeLogSet;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -39,19 +41,21 @@ public class HarvestChangeLogSetTest {
 	public void testParseCheckout() throws IOException, SAXException {		
 		InputStream syncIs=getClass().getResourceAsStream("/hco.sync.txt");
 		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", false);
-		ChangeLogSet<HarvestChangeLogEntry> syncChanges=scm.parse(null, syncIs);
+		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
+		scm.parse(syncIs, listOfChanges);
 		InputStream xmlIs=getClass().getResourceAsStream("/changelog.xml");
 		ChangeLogSet<HarvestChangeLogEntry> xmlChanges=HarvestChangeLogSet.parse(null, xmlIs);
-		assertEquals(syncChanges.getItems().length, xmlChanges.getItems().length);
+		assertEquals(listOfChanges.size(), xmlChanges.getItems().length);
 	}
 
 	@Test
 	public void testParseSync() throws IOException, SAXException {		
 		InputStream syncIs=getClass().getResourceAsStream("/hco.sync.txt");
 		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
-		ChangeLogSet<HarvestChangeLogEntry> syncChanges=scm.parse(null, syncIs);
+		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
+		scm.parse(syncIs, listOfChanges);
 		InputStream xmlIs=getClass().getResourceAsStream("/changelog.xml");
 		ChangeLogSet<HarvestChangeLogEntry> xmlChanges=HarvestChangeLogSet.parse(null, xmlIs);
-		assertEquals(syncChanges.getItems().length, xmlChanges.getItems().length);
+		assertEquals(listOfChanges.size(), xmlChanges.getItems().length);
 	}
 }
