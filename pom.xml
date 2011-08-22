@@ -5,28 +5,28 @@
     <artifactId>plugin</artifactId>
     <version>1.400</version>
   </parent>
-  
+
   <artifactId>harvest</artifactId>
   <packaging>hpi</packaging>
   <name>Jenkins Harvest SCM</name>
   <description>Integrates Jenkins to CA Harvest SCM</description>
   <version>0.4.3-SNAPSHOT</version>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Harvest+Plugin</url>
-  
+
   <distributionManagement>
    <repository>
     <id>maven.jenkins-ci.org</id>
     <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
    </repository>
   </distributionManagement>
-  
+
   <developers>
     <developer>
       <id>gliptak</id>
       <name>Gábor Lipták</name>
     </developer>
   </developers>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -37,7 +37,7 @@
       </plugin>
     </plugins>
   </build>
-  
+
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/harvest-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/harvest-plugin.git</developerConnection>
@@ -50,4 +50,9 @@
       <url>http://maven.jenkins-ci.org/content/repositories/releases</url>
     </repository>
   </repositories>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
 </project>
