@@ -75,6 +75,10 @@
     -->
     <f:textbox field="harvest.recursiveSearch" value="${scm.recursiveSearch}"/>
   </f:entry>
+  
+  <f:entry title="Options = Harvest Parameter -op (Default: pc)" >    
+    <f:textbox field="harvest.options" value="${scm.options}"/>
+  </f:entry>
 
   <f:entry title="Use Synchronize" help="${rootURL}/plugin/harvest/usesynchronize.html">
     <!--
