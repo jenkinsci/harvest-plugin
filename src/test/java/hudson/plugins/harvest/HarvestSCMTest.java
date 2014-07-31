@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -45,7 +44,7 @@ public class HarvestSCMTest {
 	@Test
 	public final void testParse() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.sync.txt");
-		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "pc",true);
 		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
 		scm.parse(is, listOfChanges);
     	ChangeLogSet<HarvestChangeLogEntry> history=new HarvestChangeLogSet(null, listOfChanges);
@@ -55,7 +54,7 @@ public class HarvestSCMTest {
 	@Test (expected=IllegalArgumentException.class)
 	public final void testParseError() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.syncerror.txt");
-		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "","pc", true);
 		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
 		scm.parse(is, listOfChanges);
 	}
@@ -63,7 +62,7 @@ public class HarvestSCMTest {
 	@Test (expected=IllegalArgumentException.class)
 	public final void testParseFail() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.syncfail.txt");
-		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "pc", true);
 		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
 		scm.parse(is, listOfChanges);
 	}
@@ -71,7 +70,7 @@ public class HarvestSCMTest {
 	@Test
 	public final void testPrepareCommandSynch(){
 		HarvestSCM scm=new HarvestSCM("broker", "user", "password",
-				"project", "DEV", "/Project", "bar", "Checkout", "", true);
+				"project", "DEV", "/Project", "bar", "Checkout", "", "pc", true);
 		ArgumentListBuilder cmd=scm.prepareCommand("hco.exe", "c:\\foo");
 		List<String> parts=cmd.toList();
 		StringBuffer sb=new StringBuffer();
@@ -79,14 +78,14 @@ public class HarvestSCMTest {
 			sb.append(s);
 			sb.append(" ");
 		}
-		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -sy -nt -r "
+		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -op pc -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -sy -nt -r "
 				, sb.toString());
 	}
 
 	@Test
 	public final void testPrepareCommandNoSynch(){
 		HarvestSCM scm=new HarvestSCM("broker", "user", "password",
-				"project", "DEV", "/Project", "bar", "Checkout", "", false);
+				"project", "DEV", "/Project", "bar", "Checkout", "","pc", false);
 		ArgumentListBuilder cmd=scm.prepareCommand("hco.exe", "c:\\foo");
 		List<String> parts=cmd.toList();
 		StringBuffer sb=new StringBuffer();
@@ -94,7 +93,7 @@ public class HarvestSCMTest {
 			sb.append(s);
 			sb.append(" ");
 		}
-		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -br -r "
+		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -op pc -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -br -r "
 				, sb.toString());
 	}
 }

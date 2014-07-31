@@ -3,14 +3,14 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.400</version>
+    <version>1.480</version>
   </parent>
 
   <artifactId>harvest</artifactId>
   <packaging>hpi</packaging>
   <name>Jenkins Harvest SCM</name>
   <description>Integrates Jenkins to CA Harvest SCM</description>
-  <version>0.5.1-SNAPSHOT</version>
+  <version>0.5.2-SNAPSHOT</version>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Harvest+Plugin</url>
 
   <distributionManagement>
@@ -23,7 +23,7 @@
   <developers>
     <developer>
       <id>gliptak</id>
-      <name>G‡bor Lipt‡k</name>
+      <name>Gâ€¡bor Liptâ€¡k</name>
     </developer>
   </developers>
 
