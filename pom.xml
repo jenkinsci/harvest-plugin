@@ -29,7 +29,7 @@
   
   	<dependencies>
 	<dependency>
-			<groupId>org.kohsuke.stapler</groupId>
+		<groupId>org.kohsuke.stapler</groupId>
 			<artifactId>stapler-jelly</artifactId>
 			<version>1.227</version>
 		</dependency>
