@@ -88,7 +88,7 @@ public class HarvestSCMTest {
 	@Ignore
 	public final void testPrepareCommandNoSynch(){
 		HarvestSCM scm=new HarvestSCM("broker", "user", "password",
-				"project", "DEV", "/Project", "bar", "Checkout", "", false);
+				"project", "DEV", "/Project", "bar", "Checkout", "","pc", false);
 		ArgumentListBuilder cmd=scm.prepareCommand("hco.exe", "c:\\foo");
 		List<String> parts=cmd.toList();
 		StringBuffer sb=new StringBuffer();
