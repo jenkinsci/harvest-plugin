@@ -191,7 +191,7 @@ public class HarvestSCM extends SCM {
         cmd.add("-en", getProjectName());
         cmd.add("-st", getState());
         cmd.add("-vp", getViewPath());
-        cmd.add("op", getOptions());
+        cmd.add("-op", getOptions());
         cmd.add("-cp");
 
         // TODO: allowing "." is just for compatibility, will be removed in future releases ...
