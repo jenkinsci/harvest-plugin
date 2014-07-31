@@ -13,7 +13,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Ignore;
 import org.xml.sax.SAXException;
 
 public class HarvestChangeLogSetTest {
@@ -39,7 +38,6 @@ public class HarvestChangeLogSetTest {
 	}
 
 	@Test
-	@Ignore
 	public void testParseCheckout() throws IOException, SAXException {		
 		InputStream syncIs=getClass().getResourceAsStream("/hco.sync.txt");
 		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "pc", false);
@@ -51,7 +49,6 @@ public class HarvestChangeLogSetTest {
 	}
 
 	@Test
-	@Ignore
 	public void testParseSync() throws IOException, SAXException {		
 		InputStream syncIs=getClass().getResourceAsStream("/hco.sync.txt");
 		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "pc",true);
