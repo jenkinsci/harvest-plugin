@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Ignore;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -69,7 +68,6 @@ public class HarvestSCMTest {
 	}
 	
 	@Test
-	@Ignore
 	public final void testPrepareCommandSynch(){
 		HarvestSCM scm=new HarvestSCM("broker", "user", "password",
 				"project", "DEV", "/Project", "bar", "Checkout", "", "pc", true);
@@ -80,12 +78,11 @@ public class HarvestSCMTest {
 			sb.append(s);
 			sb.append(" ");
 		}
-		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -sy -nt -r "
+		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -op pc -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -sy -nt -r "
 				, sb.toString());
 	}
 
 	@Test
-	@Ignore
 	public final void testPrepareCommandNoSynch(){
 		HarvestSCM scm=new HarvestSCM("broker", "user", "password",
 				"project", "DEV", "/Project", "bar", "Checkout", "","pc", false);
@@ -96,7 +93,7 @@ public class HarvestSCMTest {
 			sb.append(s);
 			sb.append(" ");
 		}
-		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -br -r "
+		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -op pc -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -br -r "
 				, sb.toString());
 	}
 }
