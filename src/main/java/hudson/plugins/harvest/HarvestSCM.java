@@ -51,7 +51,19 @@ import hudson.util.FormValidation;
  */
 public class HarvestSCM extends SCM {
 
-	private String broker = null;
+    /*-op option
+	(Optional.) Specifies where files or items should be placed in relationship to the specified view path or client directory structure.
+	Specify one of the following options:
+	p
+		Preserve directory structure—Checks out all selected items into corresponding client directories, if they already exist. If the directories do not exist, an error message is displayed and the items are not checked out.
+	pc
+		Preserve and create path structure—Checks out selected files to paths with names that correspond to their client directory location, and creates any view paths that do not currently exist.
+	as
+		All files to same view path—Checks out all selected files to the same path in the destination view, ignoring the client directory structure.
+*/
+    private final List<String> validOptions = Arrays.asList("pc","p","as");
+    private String options = "pc";
+    private String broker = null;
     private String userId = null;
     private String password = null;
     private String projectName = null;
@@ -77,7 +89,7 @@ public class HarvestSCM extends SCM {
     @DataBoundConstructor
 	public HarvestSCM(String broker, String userId, String password, String projectName,
 			String state, String viewPath, String clientPath, String processName,
-			String recursiveSearch, Boolean useSynchronize){
+			String recursiveSearch, String options,  Boolean useSynchronize){
 		this.broker=broker;
 		this.userId=userId;
 		this.password=password;
@@ -88,6 +100,7 @@ public class HarvestSCM extends SCM {
 		this.processName=processName;
 		this.recursiveSearch=recursiveSearch;
 		this.useSynchronize=useSynchronize;
+		this.options =  options;
 	}
 
     @Override
@@ -177,6 +190,7 @@ public class HarvestSCM extends SCM {
         cmd.add("-en", getProjectName());
         cmd.add("-st", getState());
         cmd.add("-vp", getViewPath());
+        cmd.add("op", getOptions());
         cmd.add("-cp");
 
         // TODO: allowing "." is just for compatibility, will be removed in future releases ...
@@ -406,6 +420,18 @@ public class HarvestSCM extends SCM {
 	 */
 	public void setRecursiveSearch(String recursiveSearch) {
 		this.recursiveSearch = recursiveSearch;
+	}
+	
+	public void setOptions(String option){
+		
+		this.options =  option;
+	}
+	
+	public String getOptions(){
+		if (this.options == null || ! this.validOptions.contains(this.options.trim())){
+			this.optiions = "pc";
+		}
+		return this.options;
 	}
 
     /**
