@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -429,7 +430,7 @@ public class HarvestSCM extends SCM {
 	
 	public String getOptions(){
 		if (this.options == null || ! this.validOptions.contains(this.options.trim())){
-			this.optiions = "pc";
+			this.options = "pc";
 		}
 		return this.options;
 	}
