@@ -23,9 +23,17 @@
   <developers>
     <developer>
       <id>gliptak</id>
-      <name>G‡bor Lipt‡k</name>
+      <name>Gâ€¡bor Liptâ€¡k</name>
     </developer>
   </developers>
+  
+  	<dependencies>
+	<dependency>
+			<groupId>org.kohsuke.stapler</groupId>
+			<artifactId>stapler-jelly</artifactId>
+			<version>1.227</version>
+		</dependency>
+	</dependencies>
 
   <build>
     <plugins>
