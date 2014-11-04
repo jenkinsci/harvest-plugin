@@ -1,7 +1,0 @@
-I00060040: New connection with Broker broker  established.
-I00020052:  No need to update file c:\dir1\file1  from repository version \repository\dir1\file1;0 .
-I00020052:  No need to update file c:\dir1\file2  from repository version \repository\dir1\file2;1 .
-I00020110: File \repository\project\dir3\file5;1  checked out to server\\C:\.hudson\jobs\project\workspace\project\dir3\file5 .
-I00020110: File \repository\project\dir3\file6;2  checked out to server\\C:\.hudson\jobs\project\workspace\dir3\file6 .
-I00060080: Check out summary: Total: 6318 ; Success: 5971 ; Failed: 347 ; Not Processed: 0 .
-Checkout failed.
