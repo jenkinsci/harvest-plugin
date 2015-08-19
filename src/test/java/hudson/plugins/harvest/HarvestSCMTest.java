@@ -4,6 +4,7 @@
 package hudson.plugins.harvest;
 
 import static org.junit.Assert.*;
+import org.apache.commons.lang.SystemUtils;
 
 import hudson.scm.ChangeLogSet;
 import hudson.util.ArgumentListBuilder;
@@ -71,7 +72,7 @@ public class HarvestSCMTest {
 	@Test
 	public final void testPrepareCommandSynch()throws Exception{
 		HarvestSCM scm=new HarvestSCM("broker", null, "user", "password",
-				"project", "DEV", "/Project", "bar", "Checkout", "", true);
+				"project", "DEV", "/Project", "bar", "Checkout", "*", true);
 		ArgumentListBuilder cmd=scm.prepareCommand("hco.exe", null, null, null, null, "c:\\foo");
 		List<String> parts=cmd.toList();
 		StringBuffer sb=new StringBuffer();
@@ -79,14 +80,20 @@ public class HarvestSCMTest {
 			sb.append(s);
 			sb.append(" ");
 		}
-		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -sy -nt -r "
+                if (SystemUtils.IS_OS_LINUX) {
+		  assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp c:\\foo"+File.separator+"bar -pn Checkout -s * -sy -nt -r "
 				, sb.toString());
+                } else {  
+		  assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"*\" -sy -nt -r "
+				, sb.toString());
+                }
+
 	}
 
 	@Test
 	public final void testPrepareCommandNoSynch() throws Exception{
 		HarvestSCM scm=new HarvestSCM("broker", null, "user", "password",
-				"project", "DEV", "/Project", "bar", "Checkout", "", false);
+				"project", "DEV", "/Project", "bar", "Checkout", "*", false);
 		ArgumentListBuilder cmd=scm.prepareCommand("hco.exe", null, null, null, null, "c:\\foo");
 		List<String> parts=cmd.toList();
 		StringBuffer sb=new StringBuffer();
@@ -94,7 +101,12 @@ public class HarvestSCMTest {
 			sb.append(s);
 			sb.append(" ");
 		}
-		assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"\" -br -r "
+                if (SystemUtils.IS_OS_LINUX) {
+		  assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp c:\\foo"+File.separator+"bar -pn Checkout -s * -br -r "
 				, sb.toString());
+                } else {
+		  assertEquals("hco.exe -b broker -usr user -pw password -en project -st DEV -vp /Project -cp \"c:\\foo"+File.separator+"bar\" -pn Checkout -s \"*\" -br -r "
+				, sb.toString());
+                }
 	}
 }
