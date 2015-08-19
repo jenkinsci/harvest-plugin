@@ -12,6 +12,13 @@
     <f:textbox field="harvest.broker" value="${scm.broker}"/>
   </f:entry>
 
+        <f:entry title="Password File"
+                 help="${rootURL}/plugin/harvest/passfile.html">
+
+            <f:textbox name="harvest.passwordFile"
+                       value="${scm.passwordFile}" />
+        </f:entry>
+
   <f:entry title="Userid" help="${rootURL}/plugin/harvest/userid.html">
     <!--
       Creates an text field that shows the value of the "name" property.

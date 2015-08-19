@@ -13,6 +13,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -21,7 +25,9 @@ import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 
 import net.sf.json.JSONObject;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -52,6 +58,7 @@ import hudson.util.FormValidation;
 public class HarvestSCM extends SCM {
 
 	private String broker = null;
+	private String passwordFile = null;
     private String userId = null;
     private String password = null;
     private String projectName = null;
@@ -75,10 +82,11 @@ public class HarvestSCM extends SCM {
 	 * @param recursiveSearch
 	 */
     @DataBoundConstructor
-	public HarvestSCM(String broker, String userId, String password, String projectName,
+	public HarvestSCM(String broker, String passwordFile, String userId, String password, String projectName,
 			String state, String viewPath, String clientPath, String processName,
 			String recursiveSearch, Boolean useSynchronize){
 		this.broker=broker;
+		this.passwordFile=passwordFile;
 		this.userId=userId;
 		this.password=password;
 		this.projectName=projectName;
@@ -123,17 +131,23 @@ public class HarvestSCM extends SCM {
             fileOutputStream.close();
         }
 
-        BufferedReader r=new BufferedReader(new FileReader(workspace.getRemote()+File.separator+"hco.log"));
-        try {
-        	String line=null;
-        	while ((line=r.readLine())!=null){
-        		listener.getLogger().println(line);
-        	}
-        } finally {
-        	if (r!=null){
-        		r.close();
-        	}
-        }
+		String hcoLogFile = workspace.getRemote() + File.separator + "hco.log";
+		try {
+			BufferedReader r = new BufferedReader(new FileReader(hcoLogFile));
+			try {
+				String line = null;
+				while ((line = r.readLine()) != null) {
+					listener.getLogger().println(line);
+				}
+			} finally {
+				if (r != null) {
+					r.close();
+				}
+			}
+		} catch (FileNotFoundException e) {
+			listener.getLogger().println("File " + hcoLogFile + " does not exist, this most likely means there was a failure to call the hco command");
+			throw e;
+		}
 
         logger.debug("completing checkout");
         return true;
@@ -144,11 +158,19 @@ public class HarvestSCM extends SCM {
 
 		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
 
-		ArgumentListBuilder cmd = prepareCommand(getDescriptor().getExecutable(), workspace.getRemote());
+		ArgumentListBuilder cmd = prepareCommand(getDescriptor().getExecutable(), getDescriptor().getDefaultBroker(), getDescriptor().getDefaultPasswordFile()
+				, getDescriptor().getDefaultUsername(), getDescriptor().getDefaultPassword() , workspace.getRemote());
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         logger.debug("launching command " + cmd.toList());
+
+		// Try to create the workspacePath if it doesn't exist
+		Path path = Paths.get(generateClientPath(workspace.getRemote()));
+		if (!Files.exists(path)) {
+			listener.getLogger().println("Creating client workspace directory: " + generateClientPath(workspace.getRemote()));
+			FileUtils.forceMkdir(new File(generateClientPath(workspace.getRemote())));
+		}
 
         // ignoring rc as sync might return 3 on success ...
         int rc = launcher.launch().cmds(cmd).stdout(baos).pwd(workspace).join();
@@ -168,25 +190,45 @@ public class HarvestSCM extends SCM {
         return listOfChanges;
 	}
 
-	protected ArgumentListBuilder prepareCommand(String executable, String workspacePath) {
+	protected String generateClientPath(String workspacePath) {
+		// TODO: allowing "." is just for compatibility, will be removed in future releases ...
+		if (StringUtils.isNotEmpty(getClientPath()) && !".".equals(getClientPath())){
+			workspacePath=workspacePath+File.separator+getClientPath();
+		}
+		return workspacePath;
+	}
+	protected ArgumentListBuilder prepareCommand(String executable, String defaultBroker, String defaultPasswordFile, String defaultUsername, String defaultPassword, String workspacePath) throws IOException {
+
+		workspacePath = generateClientPath(workspacePath);
 		ArgumentListBuilder cmd = new ArgumentListBuilder();
         cmd.add(executable);
-        cmd.add("-b", getBroker());
-        cmd.add("-usr", getUserId());
-        cmd.add("-pw", getPassword());
+        cmd.add("-b", StringUtils.isEmpty(getBroker()) ? defaultBroker : getBroker());
+
+		/*
+		If the password file option is used, it will override the user/password options
+		 */
+		if ((StringUtils.isNotEmpty(defaultPasswordFile) && StringUtils.isEmpty(getUserId()))
+						|| StringUtils.isNotEmpty(getPasswordFile()))
+		{
+			cmd.add("-eh", StringUtils.isNotEmpty(getPasswordFile()) ? getPasswordFile() : defaultPasswordFile );
+		} else {
+			cmd.add("-usr", StringUtils.isEmpty(getUserId()) ? defaultUsername : getUserId());
+			cmd.add("-pw");
+			cmd.add(StringUtils.isEmpty(getPassword()) ? defaultPassword : getPassword(), true);
+		}
+
         cmd.add("-en", getProjectName());
         cmd.add("-st", getState());
         cmd.add("-vp", getViewPath());
         cmd.add("-cp");
 
-        // TODO: allowing "." is just for compatibility, will be removed in future releases ...
-        if (!StringUtils.isEmpty(getClientPath()) && !".".equals(getClientPath())){
-        	workspacePath=workspacePath+File.separator+getClientPath();
-        }
-        cmd.addQuoted(workspacePath);
+
+		// On Linux we were ending up with double quotation and the hco command was failing, whereas it works fine on
+		//  Windows
+		if (SystemUtils.IS_OS_LINUX) { cmd.add(workspacePath); } else { cmd.addQuoted(workspacePath); }
         cmd.add("-pn", getProcessName());
         cmd.add("-s");
-        cmd.addQuoted(getRecursiveSearch());
+		if (SystemUtils.IS_OS_LINUX) { cmd.add(getRecursiveSearch()); } else { cmd.addQuoted(getRecursiveSearch()); }
 		if (isUseSynchronize()){
 			cmd.add("-sy");
 			cmd.add("-nt");
@@ -294,6 +336,20 @@ public class HarvestSCM extends SCM {
 	 */
 	public void setBroker(String broker) {
 		this.broker = broker;
+	}
+
+	/**
+	 * @return the password file
+	 */
+	public String getPasswordFile() {
+		return passwordFile;
+	}
+
+	/**
+	 * @param passwordFile the passwordFile to set
+	 */
+	public void setPasswordFile(String passwordFile) {
+		this.passwordFile = passwordFile;
 	}
 
 	/**
@@ -422,9 +478,14 @@ public class HarvestSCM extends SCM {
 		this.useSynchronize = useSynchronize;
 	}
 
+
 	public static final class DescriptorImpl extends SCMDescriptor<HarvestSCM> {
 
     	private String executable="hco";
+		private String defaultUsername;
+		private String defaultPassword;
+		private String defaultBroker;
+		private String defaultPasswordFile;
 
 		private static final Log LOGGER = LogFactory.getLog(DescriptorImpl.class);
 
@@ -444,7 +505,11 @@ public class HarvestSCM extends SCM {
             LOGGER.debug("configuring from " + req);
 
             executable = Util.fixEmpty(req.getParameter("harvest.executable").trim());
-            save();
+			defaultUsername = Util.fixEmpty(req.getParameter("harvest.defaultUsername"));
+			defaultPassword = Util.fixEmpty(req.getParameter("harvest.defaultPassword"));
+			defaultBroker = Util.fixEmpty(req.getParameter("harvest.defaultBroker"));
+			defaultPasswordFile = Util.fixEmpty(req.getParameter("harvest.defaultPasswordFile"));
+			save();
 			return true;
 		}
 
@@ -464,5 +529,19 @@ public class HarvestSCM extends SCM {
         public String getExecutable() {
             return executable;
         }
+		public void setExecutable(String executable) { this.executable = executable; }
+		public String getDefaultPasswordFile() {
+			return defaultPasswordFile;
+		}
+		public String getDefaultUsername() {
+			return defaultUsername;
+		}
+		public String getDefaultPassword() {
+			return defaultPassword;
+		}
+		public String getDefaultBroker() {
+			return defaultBroker;
+		}
+		public boolean hasDefaultUsername() { return !StringUtils.isEmpty(getDefaultUsername()); }
     }
 }

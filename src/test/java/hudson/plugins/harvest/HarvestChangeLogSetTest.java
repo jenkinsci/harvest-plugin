@@ -40,7 +40,7 @@ public class HarvestChangeLogSetTest {
 	@Test
 	public void testParseCheckout() throws IOException, SAXException {		
 		InputStream syncIs=getClass().getResourceAsStream("/hco.sync.txt");
-		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", false);
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "", false);
 		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
 		scm.parse(syncIs, listOfChanges);
 		InputStream xmlIs=getClass().getResourceAsStream("/changelog.xml");
@@ -51,7 +51,7 @@ public class HarvestChangeLogSetTest {
 	@Test
 	public void testParseSync() throws IOException, SAXException {		
 		InputStream syncIs=getClass().getResourceAsStream("/hco.sync.txt");
-		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", true);
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "", true);
 		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
 		scm.parse(syncIs, listOfChanges);
 		InputStream xmlIs=getClass().getResourceAsStream("/changelog.xml");

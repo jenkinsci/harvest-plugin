@@ -24,5 +24,29 @@
 		               value="${descriptor.executable}"
 		               checkUrl="'${rootURL}/scm/HarvestSCM/executableCheck?value='+escape(this.value)" />
 		</f:entry>
+        <f:entry title="Harvest Default Broker"
+                 help="/plugin/harvest/broker.html">
+
+            <f:textbox name="harvest.defaultBroker"
+                       value="${descriptor.defaultBroker}" />
+        </f:entry>
+        <f:entry title="Harvest Default Password File"
+                 help="/plugin/harvest/passfile.html">
+
+            <f:textbox name="harvest.defaultPasswordFile"
+                       value="${descriptor.defaultPasswordFile}" />
+        </f:entry>
+        <f:entry title="Harvest Default userid"
+                 help="/plugin/harvest/userid.html">
+
+            <f:textbox name="harvest.defaultUsername"
+                       value="${descriptor.defaultUsername}" />
+        </f:entry>
+        <f:entry title="Harvest Default Password"
+                 help="/plugin/harvest/password.html">
+
+            <f:password name="harvest.defaultPassword"
+                       value="${descriptor.defaultPassword}" />
+        </f:entry>
   </f:section>
 </j:jelly>
