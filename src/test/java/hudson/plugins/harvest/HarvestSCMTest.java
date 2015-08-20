@@ -46,7 +46,7 @@ public class HarvestSCMTest {
 	@Test
 	public final void testParse() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.sync.txt");
-		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "", true);
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "", true, "");
 		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
 		scm.parse(is, listOfChanges);
     	ChangeLogSet<HarvestChangeLogEntry> history=new HarvestChangeLogSet(null, listOfChanges);
@@ -56,7 +56,7 @@ public class HarvestSCMTest {
 	@Test (expected=IllegalArgumentException.class)
 	public final void testParseError() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.syncerror.txt");
-		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "", true);
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "", true, "");
 		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
 		scm.parse(is, listOfChanges);
 	}
@@ -64,7 +64,7 @@ public class HarvestSCMTest {
 	@Test (expected=IllegalArgumentException.class)
 	public final void testParseFail() throws IOException {
 		InputStream is=getClass().getResourceAsStream("/hco.syncfail.txt");
-		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "", true);
+		HarvestSCM scm=new HarvestSCM("", "", "", "", "", "", "", "", "", "", true, "");
 		List<HarvestChangeLogEntry> listOfChanges=new ArrayList<HarvestChangeLogEntry>();
 		scm.parse(is, listOfChanges);
 	}
@@ -72,7 +72,7 @@ public class HarvestSCMTest {
 	@Test
 	public final void testPrepareCommandSynch()throws Exception{
 		HarvestSCM scm=new HarvestSCM("broker", null, "user", "password",
-				"project", "DEV", "/Project", "bar", "Checkout", "*", true);
+				"project", "DEV", "/Project", "bar", "Checkout", "*", true, "");
 		ArgumentListBuilder cmd=scm.prepareCommand("hco.exe", null, null, null, null, "c:\\foo");
 		List<String> parts=cmd.toList();
 		StringBuffer sb=new StringBuffer();
@@ -93,7 +93,7 @@ public class HarvestSCMTest {
 	@Test
 	public final void testPrepareCommandNoSynch() throws Exception{
 		HarvestSCM scm=new HarvestSCM("broker", null, "user", "password",
-				"project", "DEV", "/Project", "bar", "Checkout", "*", false);
+				"project", "DEV", "/Project", "bar", "Checkout", "*", false, "");
 		ArgumentListBuilder cmd=scm.prepareCommand("hco.exe", null, null, null, null, "c:\\foo");
 		List<String> parts=cmd.toList();
 		StringBuffer sb=new StringBuffer();

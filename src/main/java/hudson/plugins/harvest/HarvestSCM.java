@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -68,6 +69,7 @@ public class HarvestSCM extends SCM {
     private String processName = null;
     private String recursiveSearch = null;
 	private boolean useSynchronize=true;
+	private String extraOptions=null;
 
 	/**
 	 * Constructor
@@ -84,7 +86,7 @@ public class HarvestSCM extends SCM {
     @DataBoundConstructor
 	public HarvestSCM(String broker, String passwordFile, String userId, String password, String projectName,
 			String state, String viewPath, String clientPath, String processName,
-			String recursiveSearch, Boolean useSynchronize){
+			String recursiveSearch, Boolean useSynchronize, String extraOptions){
 		this.broker=broker;
 		this.passwordFile=passwordFile;
 		this.userId=userId;
@@ -96,6 +98,7 @@ public class HarvestSCM extends SCM {
 		this.processName=processName;
 		this.recursiveSearch=recursiveSearch;
 		this.useSynchronize=useSynchronize;
+		this.extraOptions=extraOptions;
 	}
 
     @Override
@@ -236,6 +239,15 @@ public class HarvestSCM extends SCM {
 			cmd.add("-br");
 		}
         cmd.add("-r");
+
+		// Add extra options to the end of the command line.   If we add
+		// as a large string, downstream implementation will quote as one arguement
+		if (StringUtils.isNotEmpty(getExtraOptions())) {
+			String[] aList = getExtraOptions().split(",");
+			for (String a : aList) {
+				cmd.add(a);
+			}
+		};
 		return cmd;
 	}
 
@@ -478,6 +490,13 @@ public class HarvestSCM extends SCM {
 		this.useSynchronize = useSynchronize;
 	}
 
+	public String getExtraOptions() {
+		return extraOptions;
+	}
+
+	public void setExtraOptions(String extraOptions) {
+		this.extraOptions = extraOptions;
+	}
 
 	public static final class DescriptorImpl extends SCMDescriptor<HarvestSCM> {
 

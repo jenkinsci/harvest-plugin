@@ -4,91 +4,51 @@
 
     See global.jelly for a general discussion about jelly script.
   -->
-  <f:entry title="Broker" help="${rootURL}/plugin/harvest/broker.html">
-    <!--
-      Creates an text field that shows the value of the "name" property.
-      When submitted, it will be passed to the corresponding constructor parameter.
-    -->
+  <f:entry title="Broker" help="/plugin/harvest/broker.html">
     <f:textbox field="harvest.broker" value="${scm.broker}"/>
   </f:entry>
 
-        <f:entry title="Password File"
-                 help="${rootURL}/plugin/harvest/passfile.html">
+  <f:entry title="Password File" help="/plugin/harvest/passfile.html">
+     <f:textbox name="harvest.passwordFile" value="${scm.passwordFile}" />
+  </f:entry>
 
-            <f:textbox name="harvest.passwordFile"
-                       value="${scm.passwordFile}" />
-        </f:entry>
-
-  <f:entry title="Userid" help="${rootURL}/plugin/harvest/userid.html">
-    <!--
-      Creates an text field that shows the value of the "name" property.
-      When submitted, it will be passed to the corresponding constructor parameter.
-    -->
+  <f:entry title="Userid" help="/plugin/harvest/userid.html">
     <f:textbox field="harvest.userId" value="${scm.userId}"/>
   </f:entry>
   
-  <f:entry title="Password" help="${rootURL}/plugin/harvest/password.html">
-    <!--
-      Creates an text field that shows the value of the "name" property.
-      When submitted, it will be passed to the corresponding constructor parameter.
-    -->
+  <f:entry title="Password" help="/plugin/harvest/password.html">
     <f:password field="harvest.password" value="${scm.password}"/>
   </f:entry>
   
-  <f:entry title="Project Name" help="${rootURL}/plugin/harvest/project.html">
-    <!--
-      Creates an text field that shows the value of the "name" property.
-      When submitted, it will be passed to the corresponding constructor parameter.
-    -->
+  <f:entry title="Project Name" help="/plugin/harvest/project.html">
     <f:textbox field="harvest.projectName" value="${scm.projectName}"/>
   </f:entry>
   
-  <f:entry title="State" help="${rootURL}/plugin/harvest/state.html">
-    <!--
-      Creates an text field that shows the value of the "name" property.
-      When submitted, it will be passed to the corresponding constructor parameter.
-    -->
+  <f:entry title="State" help="/plugin/harvest/state.html">
     <f:textbox field="harvest.state" value="${scm.state}"/>
   </f:entry>
   
-  <f:entry title="View Path (remote)" help="${rootURL}/plugin/harvest/viewpath.html">
-    <!--
-      Creates an text field that shows the value of the "name" property.
-      When submitted, it will be passed to the corresponding constructor parameter.
-    -->
+  <f:entry title="View Path (remote)" help="/plugin/harvest/viewpath.html">
     <f:textbox field="harvest.viewPath" value="${scm.viewPath}"/>
   </f:entry>
   	
-  <f:entry title="Client Path" help="${rootURL}/plugin/harvest/clientpath.html">
-    <!--
-      Creates an text field that shows the value of the "name" property.
-      When submitted, it will be passed to the corresponding constructor parameter.
-    -->
+  <f:entry title="Client Path" help="/plugin/harvest/clientpath.html">
     <f:textbox field="harvest.clientPath" value="${scm.clientPath}"/>
   </f:entry>
   
-  <f:entry title="Process Name" help="${rootURL}/plugin/harvest/processname.html">
-    <!--
-      Creates an text field that shows the value of the "name" property.
-      When submitted, it will be passed to the corresponding constructor parameter.
-    -->
+  <f:entry title="Process Name" help="/plugin/harvest/processname.html">
     <f:textbox field="harvest.processName" value="${scm.processName}"/>
   </f:entry>
   
-  <f:entry title="Recursive Search" help="${rootURL}/plugin/harvest/recursivesearch.html">
-    <!--
-      Creates an text field that shows the value of the "name" property.
-      When submitted, it will be passed to the corresponding constructor parameter.
-    -->
+  <f:entry title="Recursive Search" help="/plugin/harvest/recursivesearch.html">
     <f:textbox field="harvest.recursiveSearch" value="${scm.recursiveSearch}"/>
   </f:entry>
 
-  <f:entry title="Use Synchronize" help="${rootURL}/plugin/harvest/usesynchronize.html">
-    <!--
-      Creates an text field that shows the value of the "name" property.
-      When submitted, it will be passed to the corresponding constructor parameter.
-    <f:checkbox name="harvest.useSynchronize" checked="${scm.useSynchronize}" />
-    -->
+  <f:entry title="Extra Options" help="/plugin/harvest/options.html">
+    <f:textbox field="harvest.extraOptions" value="${scm.extraOptions}"/>
+  </f:entry>
+
+  <f:entry title="Use Synchronize" help="/plugin/harvest/usesynchronize.html">
     <f:checkbox name="harvest.useSynchronize" checked="${scm.useSynchronize}" />
   </f:entry>
 
