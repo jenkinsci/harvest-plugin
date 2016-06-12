@@ -230,7 +230,7 @@ public class HarvestSCM extends SCM {
         cmd.add("-r");
 
         // Add extra options to the end of the command line.   If we add
-        // as a large string, downstream implementation will quote as one arguement
+        // as a large string, downstream implementation will quote as one argument
         if (StringUtils.isNotEmpty(getExtraOptions())) {
             String[] aList = getExtraOptions().split(",");
             for (String a : aList) {
