@@ -2,12 +2,13 @@ package hudson.plugins.harvest;
 
 import hudson.model.AbstractBuild;
 import hudson.scm.ChangeLogSet;
-import org.apache.commons.digester.Digester;
+import org.apache.commons.digester3.Digester;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +42,17 @@ public class HarvestChangeLogSet extends ChangeLogSet<HarvestChangeLogEntry> {
 
         // Parse the change log file.
         Digester digester = new Digester();
+        if (!Boolean.getBoolean(HarvestChangeLogSet.class.getName() + ".UNSAFE")) {
+            digester.setXIncludeAware(false);
+            try {
+                digester.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                digester.setFeature("http://xml.org/sax/features/external-general-entities", false);
+                digester.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+                digester.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            } catch (ParserConfigurationException ex) {
+                throw new SAXException("Failed to securely configure xml digester parser", ex);
+            }
+        }
         digester.setClassLoader(HarvestChangeLogSet.class.getClassLoader());
         digester.push(history);
         digester.addObjectCreate("*/entry", HarvestChangeLogEntry.class);
